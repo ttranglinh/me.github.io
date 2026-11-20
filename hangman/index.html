@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>0. The Hangman </title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #ffffff;
+      --surface: #f7f7f5;
+      --surface-hover: #efefec;
+      --ink: #111111;
+      --muted: #5a5a57;
+      --subtle: #8c8c87;
+      --border: #e3e3e0;
+      --border-strong: #111111;
+      --accent-bg: #111111;
+      --accent-ink: #ffffff;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --surface: #1a1a1a;
+      --surface-hover: #242424;
+      --ink: #f2f2f0;
+      --muted: #a3a39e;
+      --subtle: #73736e;
+      --border: #2a2a28;
+      --border-strong: #f2f2f0;
+      --accent-bg: #f2f2f0;
+      --accent-ink: #121212;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    /* Top Notion Bar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+    }
+
+    .breadcrumb a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+      color: var(--ink);
+      text-decoration: underline;
+    }
+
+    .breadcrumb strong {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .topbar-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn {
+      background: var(--surface);
+      color: var(--ink);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 5px 11px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover:not(:disabled) {
+      border-color: var(--border-strong);
+      background: var(--surface-hover);
+    }
+
+    .btn.primary {
+      background: var(--accent-bg);
+      color: var(--accent-ink);
+      border-color: var(--accent-bg);
+    }
+
+    .btn.primary:hover:not(:disabled) {
+      opacity: 0.88;
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Main Layout */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .header-block {
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      font-size: clamp(24px, 3.5vw, 32px);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 14.5px;
+      max-width: 660px;
+    }
+
+    /* Controls Bar */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 24px;
+    }
+
+    .category-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .cat-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .cat-btn:hover {
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    .cat-btn.active {
+      background: var(--bg);
+      border-color: var(--border);
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    /* Workspace Grid */
+    .workspace {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 760px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      padding: 20px;
+    }
+
+    .panel-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--subtle);
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Gallows Panel */
+    .gallows-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .figure-part {
+      stroke-dasharray: 120;
+      stroke-dashoffset: 120;
+      transition: stroke-dashoffset 0.35s ease;
+    }
+
+    .figure-part.visible {
+      stroke-dashoffset: 0;
+    }
+
+    .state-dots {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1px solid var(--border-strong);
+      background: transparent;
+      transition: background 0.2s ease;
+    }
+
+    .dot.filled {
+      background: var(--ink);
+    }
+
+    /* Word & Keyboard Panel */
+    .status-banner {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      padding: 8px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .clue-box {
+      font-size: 13.5px;
+      color: var(--muted);
+      background: var(--surface);
+      border-left: 2px solid var(--border-strong);
+      padding: 10px 12px;
+      margin-bottom: 18px;
+      display: none;
+    }
+
+    .clue-box.visible {
+      display: block;
+    }
+
+    .word-display {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 22px 0 26px;
+      min-height: 46px;
+    }
+
+    .letter-slot {
+      width: 34px;
+      height: 42px;
+      border-bottom: 2px solid var(--border-strong);
+      display: grid;
+      place-items: center;
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .letter-slot.missed {
+      color: var(--subtle);
+    }
+
+    .keyboard {
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      gap: 6px;
+    }
+
+    @media (max-width: 480px) {
+      .keyboard {
+        grid-template-columns: repeat(7, 1fr);
+      }
+    }
+
+    .key {
+      padding: 9px 0;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--ink);
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+
+    .key:hover:not(:disabled) {
+      border-color: var(--border-strong);
+      background: var(--surface-hover);
+    }
+
+    .key.correct {
+      background: var(--accent-bg);
+      color: var(--accent-ink);
+      border-color: var(--accent-bg);
+    }
+
+    .key.wrong {
+      opacity: 0.25;
+      text-decoration: line-through;
+    }
+
+    .key:disabled {
+      cursor: not-allowed;
+    }
+
+    /* Post-Round Note */
+    .concept-note {
+      margin-top: 18px;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 13px;
+      color: var(--muted);
+      display: none;
+    }
+
+    .concept-note.visible {
+      display: block;
+    }
+
+    /* AI Heuristic Solver Panel */
+    .solver-panel {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      padding: 20px;
+    }
+
+    .solver-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .solver-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .solver-sub {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .freq-bars {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .freq-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 8px 10px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .freq-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .bar-track {
+      height: 4px;
+      background: var(--surface);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: var(--ink);
+      transition: width 0.25s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="breadcrumb">
+      <a href="../">Linh</a>
+      <span>/</span>
+      <strong>The Hangman Simulation</strong>
+    </div>
+    <div class="topbar-controls">
+      <button class="btn" id="themeBtn" type="button">Theme: Light</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="header-block">
+      <h1>The Hangman Simulation</h1>
+      <p class="subtitle">
+        A minimalist state-machine implementation of Hangman paired with a real-time candidate-filtering and character-frequency heuristic solver. Use your physical keyboard or click letters below.
+      </p>
+    </div>
+
+    <!-- Category & Game Toolbar -->
+    <div class="toolbar">
+      <div class="category-group" id="categoryGroup">
+        <button class="cat-btn active" data-cat="All" type="button">All Topics</button>
+        <button class="cat-btn" data-cat="Algorithms" type="button">Algorithms & CS</button>
+        <button class="cat-btn" data-cat="Graphics" type="button">Creative Coding</button>
+        <button class="cat-btn" data-cat="Structures" type="button">Data Structures</button>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn" id="clueBtn" type="button">Toggle Clue</button>
+        <button class="btn primary" id="newGameBtn" type="button">New Round</button>
+      </div>
+    </div>
+
+    <!-- Main Interactive Workspace -->
+    <div class="workspace">
+      <!-- Left: SVG Gallows & Vector State -->
+      <div class="panel gallows-wrap">
+        <div class="panel-label" style="width: 100%;">
+          <span>State Vector</span>
+          <span id="errorRatio">0 / 6</span>
+        </div>
+
+        <svg width="200" height="210" viewBox="0 0 200 210" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+          <!-- Gallows Frame -->
+          <line x1="24" y1="190" x2="120" y2="190"></line>
+          <line x1="56" y1="190" x2="56" y2="22"></line>
+          <line x1="56" y1="22" x2="138" y2="22"></line>
+          <line x1="56" y1="48" x2="82" y2="22"></line>
+          <line x1="138" y1="22" x2="138" y2="46"></line>
+
+          <!-- 6-Stroke Figure -->
+          <circle id="part-0" class="figure-part" cx="138" cy="62" r="16"></circle>
+          <line id="part-1" class="figure-part" x1="138" y1="78" x2="138" y2="128"></line>
+          <line id="part-2" class="figure-part" x1="138" y1="92" x2="114" y2="114"></line>
+          <line id="part-3" class="figure-part" x1="138" y1="92" x2="162" y2="114"></line>
+          <line id="part-4" class="figure-part" x1="138" y1="128" x2="118" y2="162"></line>
+          <line id="part-5" class="figure-part" x1="138" y1="128" x2="158" y2="162"></line>
+        </svg>
+
+        <div class="state-dots" id="stateDots">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+      </div>
+
+      <!-- Right: Word Slots & Keyboard -->
+      <div class="panel">
+        <div class="status-banner">
+          <span id="statusText">STATUS: IN_PROGRESS</span>
+          <span id="catBadge">TOPIC: ALGORITHMS</span>
+        </div>
+
+        <div class="clue-box" id="clueBox"></div>
+
+        <div class="word-display" id="wordDisplay"></div>
+
+        <div class="keyboard" id="keyboard"></div>
+
+        <div class="concept-note" id="conceptNote"></div>
+      </div>
+    </div>
+
+    <!-- Frequency Heuristic AI Solver Visualizer -->
+    <section class="solver-panel">
+      <div class="solver-top">
+        <div>
+          <div class="solver-title">Frequency-Heuristic Solver Visualizer</div>
+          <div class="solver-sub" id="solverStats">
+            Filters dictionary by word length & positional constraints, then ranks unguessed characters by probability.
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn" id="aiStepBtn" type="button">AI Step</button>
+          <button class="btn primary" id="aiAutoBtn" type="button">Auto-Solve</button>
+        </div>
+      </div>
+      <div class="freq-bars" id="freqBars"></div>
+    </section>
+  </main>
+
+  <script>
+    const DICTIONARY = [
+      { word: 'RECURSION', cat: 'Algorithms', clue: 'A function calling itself until reaching a base case.', note: 'Used in fractal trees, DFS maze carving, and divide-and-conquer sorting.' },
+      { word: 'BACKTRACKING', cat: 'Algorithms', clue: 'Incremental search that abandons dead-end paths.', note: 'Core mechanism behind recursive maze generation and constraint solvers.' },
+      { word: 'HEURISTIC', cat: 'Algorithms', clue: 'A practical rule-of-thumb strategy for fast problem solving.', note: 'A* pathfinding uses Manhattan or Euclidean distance heuristics to guide search.' },
+      { word: 'COMPLEXITY', cat: 'Algorithms', clue: 'Measures how runtime or memory scales with input size.', note: 'Often expressed in Big-O notation such as O(n log n).' },
+      { word: 'PENDULUM', cat: 'Graphics', clue: 'A suspended mass swinging under gravitational acceleration.', note: 'Coupling two pendulums creates a chaotic system solved via RK4 integration.' },
+      { word: 'KALEIDOSCOPE', cat: 'Graphics', clue: 'Symmetrical visual patterns generated via angular reflection.', note: 'Built in Canvas/p5.js using polar coordinates and rotational transforms.' },
+      { word: 'SHADER', cat: 'Graphics', clue: 'A small program executed in parallel per pixel on the GPU.', note: 'GLSL fragment shaders power real-time procedural noise and raymarching.' },
+      { word: 'KINEMATICS', cat: 'Graphics', clue: 'Describes motion via position, velocity, and acceleration.', note: 'Updating velocity by acceleration each frame forms the core physics loop.' },
+      { word: 'QUADTREE', cat: 'Structures', clue: 'A tree structure that recursively divides 2D space into four quadrants.', note: 'Reduces 2D particle collision checks from O(n²) down to O(n log n).' },
+      { word: 'HASHMAP', cat: 'Structures', clue: 'Maps keys to values for O(1) average lookup time.', note: 'Essential for frequency counting and caching computed states.' },
+      { word: 'ADJACENCY', cat: 'Structures', clue: 'Matrix or list representation showing connected graph vertices.', note: 'Used to represent grids and networks in graph traversal algorithms.' },
+      { word: 'QUEUE', cat: 'Structures', clue: 'First-In, First-Out (FIFO) linear collection.', note: 'Controls Breadth-First Search (BFS) and grid movement in Snake.' }
+    ];
+
+    let selectedCategory = 'All';
+    let currentEntry = DICTIONARY[0];
+    let guessedLetters = new Set();
+    let wrongGuesses = 0;
+    let autoTimer = null;
+
+    const MAX_ERRORS = 6;
+    const wordDisplay = document.getElementById('wordDisplay');
+    const keyboardEl = document.getElementById('keyboard');
+    const statusText = document.getElementById('statusText');
+    const catBadge = document.getElementById('catBadge');
+    const errorRatio = document.getElementById('errorRatio');
+    const stateDots = document.querySelectorAll('#stateDots .dot');
+    const clueBox = document.getElementById('clueBox');
+    const conceptNote = document.getElementById('conceptNote');
+    const solverStats = document.getElementById('solverStats');
+    const freqBars = document.getElementById('freqBars');
+    const aiStepBtn = document.getElementById('aiStepBtn');
+    const aiAutoBtn = document.getElementById('aiAutoBtn');
+
+    // Theme Toggle
+    const themeBtn = document.getElementById('themeBtn');
+    themeBtn.addEventListener('click', () => {
+      const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      if (dark) {
+        document.documentElement.removeAttribute('data-theme');
+        themeBtn.textContent = 'Theme: Light';
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeBtn.textContent = 'Theme: Dark';
+      }
+    });
+
+    // Category Selection
+    document.querySelectorAll('.cat-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.cat-btn').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedCategory = btn.dataset.cat;
+        startNewRound();
+      });
+    });
+
+    document.getElementById('clueBtn').addEventListener('click', () => {
+      clueBox.classList.toggle('visible');
+    });
+
+    document.getElementById('newGameBtn').addEventListener('click', startNewRound);
+
+    function startNewRound() {
+      if (autoTimer) {
+        clearInterval(autoTimer);
+        autoTimer = null;
+        aiAutoBtn.textContent = 'Auto-Solve';
+      }
+
+      const pool = selectedCategory === 'All'
+        ? DICTIONARY
+        : DICTIONARY.filter((item) => item.cat === selectedCategory);
+
+      currentEntry = pool[Math.floor(Math.random() * pool.length)];
+      guessedLetters = new Set();
+      wrongGuesses = 0;
+
+      clueBox.textContent = `Clue: ${currentEntry.clue}`;
+      clueBox.classList.remove('visible');
+      conceptNote.classList.remove('visible');
+      catBadge.textContent = `TOPIC: ${currentEntry.cat.toUpperCase()}`;
+
+      renderAll();
+    }
+
+    function isSolved() {
+      return currentEntry.word.split('').every((ch) => guessedLetters.has(ch));
+    }
+
+    function isGameOver() {
+      return isSolved() || wrongGuesses >= MAX_ERRORS;
+    }
+
+    function makeGuess(letter) {
+      if (isGameOver() || guessedLetters.has(letter)) return;
+      guessedLetters.add(letter);
+      if (!currentEntry.word.includes(letter)) {
+        wrongGuesses++;
+      }
+      renderAll();
+    }
+
+    function computeSolverAnalysis() {
+      const target = currentEntry.word;
+      const wrongSet = new Set([...guessedLetters].filter((l) => !target.includes(l)));
+
+      // Filter candidate words matching length, known positions, and excluded letters
+      const candidates = DICTIONARY.map((d) => d.word).filter((w) => {
+        if (w.length !== target.length) return false;
+        for (let i = 0; i < target.length; i++) {
+          const revealed = guessedLetters.has(target[i]) ? target[i] : null;
+          if (revealed && w[i] !== revealed) return false;
+          if (!revealed && guessedLetters.has(w[i])) return false;
+        }
+        for (const bad of wrongSet) {
+          if (w.includes(bad)) return false;
+        }
+        return true;
+      });
+
+      const freq = {};
+      let totalSlots = 0;
+      candidates.forEach((word) => {
+        const uniqueChars = new Set(word.split(''));
+        uniqueChars.forEach((ch) => {
+          if (!guessedLetters.has(ch)) {
+            freq[ch] = (freq[ch] || 0) + 1;
+            totalSlots++;
+          }
+        });
+      });
+
+      const ranked = Object.entries(freq)
+        .sort((a, b) => b[1] - a[1])
+        .map(([letter, count]) => ({
+          letter,
+          count,
+          pct: candidates.length ? Math.round((count / candidates.length) * 100) : 0
+        }));
+
+      return { candidates, ranked };
+    }
+
+    function renderAll() {
+      // Update SVG Figure & Dots
+      for (let i = 0; i < MAX_ERRORS; i++) {
+        const part = document.getElementById(`part-${i}`);
+        part.classList.toggle('visible', i < wrongGuesses);
+        stateDots[i].classList.toggle('filled', i < wrongGuesses);
+      }
+      errorRatio.textContent = `${wrongGuesses} / ${MAX_ERRORS}`;
+
+      // Update Word Display
+      const solved = isSolved();
+      const lost = wrongGuesses >= MAX_ERRORS && !solved;
+      wordDisplay.innerHTML = '';
+
+      currentEntry.word.split('').forEach((ch) => {
+        const slot = document.createElement('div');
+        slot.className = 'letter-slot';
+        if (guessedLetters.has(ch)) {
+          slot.textContent = ch;
+        } else if (lost) {
+          slot.textContent = ch;
+          slot.classList.add('missed');
+        }
+        wordDisplay.appendChild(slot);
+      });
+
+      // Update Status Banner & Concept Note
+      if (solved) {
+        statusText.textContent = 'STATUS: SOLVED';
+        conceptNote.innerHTML = `<strong>CS Context:</strong> ${currentEntry.note}`;
+        conceptNote.classList.add('visible');
+      } else if (lost) {
+        statusText.textContent = `STATUS: HALTED (${currentEntry.word})`;
+        conceptNote.innerHTML = `<strong>CS Context:</strong> ${currentEntry.note}`;
+        conceptNote.classList.add('visible');
+      } else {
+        statusText.textContent = 'STATUS: IN_PROGRESS';
+      }
+
+      // Update Keyboard
+      keyboardEl.innerHTML = '';
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach((letter) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'key';
+        btn.textContent = letter;
+
+        if (guessedLetters.has(letter)) {
+          btn.disabled = true;
+          btn.classList.add(currentEntry.word.includes(letter) ? 'correct' : 'wrong');
+        } else if (solved || lost) {
+          btn.disabled = true;
+        }
+
+        btn.addEventListener('click', () => makeGuess(letter));
+        keyboardEl.appendChild(btn);
+      });
+
+      // Update Solver Panel
+      const { candidates, ranked } = computeSolverAnalysis();
+      aiStepBtn.disabled = isGameOver() || ranked.length === 0;
+      aiAutoBtn.disabled = isGameOver() || ranked.length === 0;
+
+      solverStats.textContent = `Candidate pool: ${candidates.length} matching word(s) • Next optimal guess: ${ranked[0] ? `'${ranked[0].letter}' (${ranked[0].pct}%)` : 'None'}`;
+
+      freqBars.innerHTML = '';
+      ranked.slice(0, 6).forEach((item) => {
+        const card = document.createElement('div');
+        card.className = 'freq-item';
+        card.innerHTML = `
+          <div class="freq-row">
+            <strong>${item.letter}</strong>
+            <span>${item.pct}%</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: ${item.pct}%"></div>
+          </div>
+        `;
+        freqBars.appendChild(card);
+      });
+    }
+
+    // AI Single Step & Auto-Solve
+    function stepSolver() {
+      if (isGameOver()) return;
+      const { ranked } = computeSolverAnalysis();
+      if (ranked.length > 0) {
+        makeGuess(ranked[0].letter);
+      }
+    }
+
+    aiStepBtn.addEventListener('click', stepSolver);
+
+    aiAutoBtn.addEventListener('click', () => {
+      if (autoTimer) {
+        clearInterval(autoTimer);
+        autoTimer = null;
+        aiAutoBtn.textContent = 'Auto-Solve';
+        return;
+      }
+      aiAutoBtn.textContent = 'Stop';
+      stepSolver();
+      autoTimer = setInterval(() => {
+        if (isGameOver()) {
+          clearInterval(autoTimer);
+          autoTimer = null;
+          aiAutoBtn.textContent = 'Auto-Solve';
+        } else {
+          stepSolver();
+        }
+      }, 450);
+    });
+
+    // Physical Keyboard Support
+    document.addEventListener('keydown', (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const key = e.key.toUpperCase();
+      if (/^[A-Z]$/.test(key)) {
+        makeGuess(key);
+      }
+    });
+
+    startNewRound();
+  </script>
+</body>
+</html>

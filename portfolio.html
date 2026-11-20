@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>me — Creative Coder </title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ==========================================================================
+       MONOCHROME DESIGN TOKENS (LIGHT & DARK MODES)
+       ========================================================================== */
+    :root {
+      --bg: #ffffff;
+      --bg-subtle: #f7f7f5;
+      --bg-hover: #efefef;
+      --card-surface: #fafafa;
+      --ink: #111111;
+      --ink-muted: #666664;
+      --ink-faint: #9a9a96;
+      --border: #e4e4e1;
+      --border-strong: #111111;
+      --tag-bg: #f0f0ed;
+      --shadow-card: 0 10px 28px rgba(0, 0, 0, 0.08);
+      --shadow-lift: 0 18px 40px rgba(0, 0, 0, 0.14);
+    }
+
+    [data-theme="dark"] {
+      --bg: #111111;
+      --bg-subtle: #181818;
+      --bg-hover: #232323;
+      --card-surface: #151515;
+      --ink: #f4f4f2;
+      --ink-muted: #9b9b97;
+      --ink-faint: #666664;
+      --border: #292929;
+      --border-strong: #f4f4f2;
+      --tag-bg: #202020;
+      --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.55);
+      --shadow-lift: 0 18px 44px rgba(0, 0, 0, 0.78);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+      transition: background-color 0.2s ease, color 0.2s ease;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    .font-mono-code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .font-tarot {
+      font-family: 'Cinzel', Georgia, serif;
+    }
+
+    /* ==========================================================================
+       NOTION TOP BREADCRUMB BAR
+       ========================================================================== */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 20px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--ink-muted);
+      min-width: 0;
+    }
+
+    .breadcrumb .crumb-active {
+      color: var(--ink);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .mono-btn {
+      background: var(--bg-subtle);
+      color: var(--ink);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 5px 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+    }
+
+    .mono-btn:hover:not(:disabled) {
+      background: var(--bg-hover);
+      border-color: var(--border-strong);
+    }
+
+    .mono-btn:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .mono-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .mono-btn.solid {
+      background: var(--ink);
+      color: var(--bg);
+      border-color: var(--ink);
+      font-weight: 500;
+    }
+
+    .mono-btn.solid:hover:not(:disabled) {
+      opacity: 0.88;
+    }
+
+    /* ==========================================================================
+       MAIN PAGE CONTAINER & AVATAR HEADER
+       ========================================================================== */
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 20px 88px;
+    }
+
+    .hero-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 22px;
+      margin-bottom: 28px;
+    }
+
+    /* Avatar Circle with clean monochrome fallback */
+    .avatar-frame {
+      position: relative;
+      flex: 0 0 auto;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .avatar-circle {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 9999px;
+      filter: grayscale(100%) contrast(1.08);
+      display: block;
+    }
+
+    .avatar-fallback {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--ink);
+      background: var(--bg-subtle);
+    }
+
+    .avatar-frame.is-fallback .avatar-circle {
+      display: none;
+    }
+
+    .avatar-frame.is-fallback .avatar-fallback {
+      display: flex;
+    }
+
+    .hero-text {
+      min-width: 220px;
+      flex: 1;
+    }
+
+    h1 {
+      font-size: clamp(28px, 4.5vw, 36px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      color: var(--ink-muted);
+      font-size: 14.5px;
+    }
+
+    /* ==========================================================================
+       PROPERTY METADATA & CALLOUT BLOCK
+       ========================================================================== */
+    .properties {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+      margin-bottom: 24px;
+      display: grid;
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .prop-row {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .prop-key {
+      color: var(--ink-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+
+    .prop-val {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .tag {
+      background: var(--tag-bg);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--ink);
+    }
+
+    .social-links a {
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+      margin-right: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      padding-bottom: 1px;
+    }
+
+    .social-links a:hover {
+      border-bottom-color: var(--border-strong);
+    }
+
+    .callout {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--border-strong);
+      border-radius: 4px;
+      padding: 14px 16px;
+      margin-bottom: 36px;
+      font-size: 13.5px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .callout-glyph {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      padding: 1px 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      border-radius: 3px;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    /* ==========================================================================
+       PROJECTS SECTION HEADER, FILTERS & VIEW MODE TOGGLE
+       ========================================================================== */
+    .projects-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+    }
+
+    .toolbar-right {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .filter-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .filter-tab {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--ink-muted);
+      padding: 4px 9px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      cursor: pointer;
+      transition: all 0.14s ease;
+    }
+
+    .filter-tab:hover {
+      color: var(--ink);
+      background: var(--bg-subtle);
+    }
+
+    .filter-tab.active {
+      color: var(--ink);
+      background: var(--bg-subtle);
+      border-color: var(--border);
+      font-weight: 600;
+    }
+
+    .view-switch {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      background: var(--bg-subtle);
+    }
+
+    .view-btn {
+      background: transparent;
+      border: none;
+      color: var(--ink-muted);
+      padding: 4px 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      cursor: pointer;
+    }
+
+    .view-btn.active {
+      background: var(--ink);
+      color: var(--bg);
+      font-weight: 500;
+    }
+
+    /* ==========================================================================
+       WOODCUT / LINE-ART TAROT CARD STYLING (PORTRAIT 2:3 PROPORTIONS)
+       ========================================================================== */
+    .tarot-card {
+      aspect-ratio: 2 / 3;
+      background: var(--card-surface);
+      border: 1.5px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 7px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-card);
+      position: relative;
+      user-select: none;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, border-color 0.2s ease;
+    }
+
+    .tarot-inner-frame {
+      flex: 1;
+      border: 1px solid var(--border-strong);
+      border-radius: 4px;
+      padding: 8px 8px 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .tarot-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding-bottom: 5px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tarot-roman {
+      color: var(--ink);
+    }
+
+    .tarot-arcana-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9.5px;
+      font-weight: 500;
+      color: var(--ink-muted);
+      letter-spacing: 0.04em;
+    }
+
+    .tarot-art-box {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tarot-art-box svg {
+      width: 100%;
+      height: 100%;
+      max-height: 175px;
+      stroke: var(--ink);
+      fill: none;
+    }
+
+    .tarot-nameplate {
+      border-top: 1.5px solid var(--border-strong);
+      background: var(--bg-subtle);
+      padding: 7px 6px;
+      text-align: center;
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      color: var(--ink);
+    }
+
+    /* ==========================================================================
+       STACKED DECK STAGE & INSPECTOR PANEL
+       ========================================================================== */
+    .deck-stage-layout {
+      display: grid;
+      grid-template-columns: minmax(220px, 270px) 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .deck-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .card-stack-viewport {
+      position: relative;
+      width: 240px;
+      aspect-ratio: 2 / 3;
+      cursor: pointer;
+    }
+
+    .card-stack-viewport .tarot-card {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .deck-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .deck-counter {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      color: var(--ink-muted);
+      text-align: center;
+    }
+
+    /* Drawn Card Dossier / Inspector */
+    .dossier-panel {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-subtle);
+      padding: 20px 22px;
+    }
+
+    .dossier-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      color: var(--ink-muted);
+    }
+
+    .dossier-title {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+    }
+
+    .dossier-desc {
+      font-size: 13.5px;
+      color: var(--ink-muted);
+      margin-bottom: 14px;
+    }
+
+    .dossier-meaning {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 10px 12px;
+      font-size: 12.5px;
+      margin-bottom: 16px;
+    }
+
+    .dossier-meaning strong {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .dossier-footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ==========================================================================
+       SPREAD / GRID VIEW OF TAROT CARDS
+       ========================================================================== */
+    .spread-grid {
+      display: none;
+      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      gap: 18px;
+    }
+
+    .spread-grid.active {
+      display: grid;
+    }
+
+    .deck-stage-layout.hidden-view {
+      display: none;
+    }
+
+    .spread-card-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .spread-card-wrap .tarot-card {
+      cursor: pointer;
+    }
+
+    .spread-card-wrap .tarot-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lift);
+    }
+
+    .spread-meta {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-subtle);
+      padding: 9px 10px;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .spread-meta p {
+      color: var(--ink-muted);
+      font-size: 11.5px;
+      line-height: 1.45;
+    }
+
+    .spread-meta-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      color: var(--ink-muted);
+    }
+
+    /* ==========================================================================
+       FOOTER
+       ========================================================================== */
+    footer {
+      margin-top: 64px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--ink-muted);
+    }
+
+    @media (max-width: 720px) {
+      .deck-stage-layout {
+        grid-template-columns: 1fr;
+      }
+      .card-stack-viewport {
+        width: 215px;
+      }
+      .prop-row {
+        grid-template-columns: 1fr;
+        gap: 3px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Notion Breadcrumb Bar -->
+  <header class="topbar">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <span>me.inventor</span>
+      <span>/</span>
+      <span class="crumb-active">Creative Coder</span>
+    </nav>
+    <button type="button" class="mono-btn" id="themeToggle" aria-label="Toggle light or dark monochrome mode">
+      <span id="themeIcon">◐</span>
+      <span id="themeLabel">Monochrome</span>
+    </button>
+  </header>
+
+  <main class="container">
+    <!-- Hero Header with Avatar (<img src="avatar.png" alt="Linh" class="avatar-circle">) -->
+    <section class="hero-header" aria-label="Profile header">
+      <div class="avatar-frame" id="avatarFrame">
+        <img
+          src="avatar.png"
+          alt="Linh"
+          class="avatar-circle"
+          onerror="document.getElementById('avatarFrame').classList.add('is-fallback');"
+        />
+        <span class="avatar-fallback" aria-hidden="true">L</span>
+      </div>
+
+      <div class="hero-text">
+        <h1>me</h1>
+        <p class="subtitle">Less or more experiments. Who knows.</p>
+      </div>
+    </section>
+
+    <!-- Property Metadata Block -->
+    <section class="properties" aria-label="Metadata properties">
+      <div class="prop-row">
+        <div class="prop-key">Philosophy</div>
+        <div class="prop-val">
+          <span class="tag">Less is more</span>
+          <span class="tag">Demystification</span>
+          <span class="tag">Visual Craft</span>
+        </div>
+      </div>
+      <div class="prop-row">
+        <div class="prop-key">Toolkit</div>
+        <div class="prop-val">
+          <span class="tag">Python</span>
+          <span class="tag">JavaScript</span>
+          <span class="tag">p5.js</span>
+          <span class="tag">HTML / Canvas</span>
+          <span class="tag">SVG</span>
+        </div>
+      </div>
+      <div class="prop-row">
+        <div class="prop-key">Links</div>
+        <div class="prop-val social-links">
+          <a href="https://github.com/" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+          <a href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer">TikTok ↗</a>
+          <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tarot Deck / Spread Projects Section -->
+    <section aria-labelledby="projectsHeading">
+      <div class="projects-toolbar">
+        <h2 class="section-title" id="projectsHeading">Project Arcana Deck</h2>
+
+        <div class="toolbar-right">
+          <div class="filter-tabs" role="tablist" aria-label="Filter projects by category">
+            <button type="button" class="filter-tab active" data-filter="all" role="tab" aria-selected="true">All</button>
+            <button type="button" class="filter-tab" data-filter="games" role="tab" aria-selected="false">Games</button>
+            <button type="button" class="filter-tab" data-filter="simulations" role="tab" aria-selected="false">Simulations</button>
+            <button type="button" class="filter-tab" data-filter="tools" role="tab" aria-selected="false">Tools</button>
+          </div>
+
+          <div class="view-switch" role="group" aria-label="Card layout mode">
+            <button type="button" class="view-btn active" id="viewDeckBtn">Stack Deck</button>
+            <button type="button" class="view-btn" id="viewGridBtn">Full Spread</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mode 1: Interactive Stacked Tarot Deck + Dossier Inspector -->
+      <div class="deck-stage-layout" id="deckStage">
+        <div class="deck-column">
+          <div class="card-stack-viewport" id="cardStack" title="Click to draw / cycle next card" role="button" tabindex="0" aria-label="Interactive tarot card stack. Click to cycle to next project.">
+            <!-- Cards rendered via JS -->
+          </div>
+
+          <div class="deck-controls">
+            <button type="button" class="mono-btn" id="prevCardBtn" aria-label="Previous card">← Prev</button>
+            <button type="button" class="mono-btn solid" id="drawCardBtn">Draw Next →</button>
+            <button type="button" class="mono-btn" id="shuffleDeckBtn" aria-label="Shuffle deck">Shuffle</button>
+          </div>
+
+          <div class="deck-counter" id="deckCounter">Card I of VIII</div>
+        </div>
+
+        <aside class="dossier-panel" id="dossierPanel" aria-live="polite">
+          <!-- Active card details rendered via JS -->
+        </aside>
+      </div>
+
+      <!-- Mode 2: Full Tarot Card Grid / Spread -->
+      <div class="spread-grid" id="spreadGrid" aria-label="Full tarot card spread">
+        <!-- Grid cards rendered via JS -->
+      </div>
+    </section>
+
+    <footer>
+      <span>me.inventor </span>
+    </footer>
+  </main>
+
+  <script>
+    /**
+     * Tarot-styled project entries with Roman numerals, custom woodcut/line-art SVGs,
+     * categories, statuses, stack tags, and optional live links.
+     */
+    const PROJECTS = [
+      {
+        id: "hangman",
+        numeral: "I",
+        code: "ARCANA · 01",
+        title: "The Hangman",
+        fullTitle: "I. The Hangman",
+        category: "games",
+        categoryLabel: "Game & Heuristic AI",
+        status: "Live",
+        live: true,
+        url: "./hangman/",
+        tags: ["State Machine", "Frequency AI", "SVG"],
+        description: "Interactive monochrome word deduction simulation paired with a candidate-filtering letter frequency solver.",
+        concept: "Constraint pruning over a candidate dictionary ranked by unguessed character probability.",
+        art: `
+          <svg viewBox="0 0 140 170" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="20" y1="154" x2="120" y2="154" stroke-width="2.2" />
+            <line x1="42" y1="154" x2="42" y2="22" stroke-width="2.2" />
+            <line x1="42" y1="22" x2="96" y2="22" stroke-width="2.2" />
+            <line x1="42" y1="42" x2="62" y2="22" />
+            <line x1="96" y1="22" x2="96" y2="44" stroke-dasharray="3 2" />
+            <circle cx="96" cy="56" r="12" />
+            <circle cx="92" cy="54" r="1.2" fill="currentColor" stroke="none" />
+            <circle cx="100" cy="54" r="1.2" fill="currentColor" stroke="none" />
+            <path d="M92 61 Q96 58 100 61" />
+            <line x1="96" y1="68" x2="96" y2="106" />
+            <line x1="96" y1="78" x2="76" y2="96" />
+            <line x1="96" y1="78" x2="116" y2="96" />
+            <line x1="96" y1="106" x2="80" y2="136" />
+            <line x1="96" y1="106" x2="112" y2="136" />
+          </svg>
+        `
+      },
+      {
+        id: "solar-gravity",
+        numeral: "II",
+        code: "ARCANA · 02",
+        title: "The Cosmos",
+        fullTitle: "II. Gravity & Solar System",
+        category: "simulations",
+        categoryLabel: "Physics Simulation",
+        status: "Planned",
+        live: false,
+        url: "",
+        tags: ["Vectors", "Newtonian Gravity", "Canvas"],
+        description: "2D orbital mechanics sandbox computing pairwise gravitational attraction, velocity vectors, and trajectory trails.",
+        concept: "Force accumulation F = G·m₁·m₂ / r² integrated frame-by-frame into acceleration and position vectors.",
+        art: `
+          <svg viewBox="0 0 140 170" stroke-width="1.6">
+            <circle cx="70" cy="85" r="14" fill="currentColor" fill-opacity="0.14" />
+            <circle cx="70" cy="85" r="6" />
+            <line x1="70" y1="56" x2="70" y2="65" />
+            <line x1="70" y1="105" x2="70" y2="114" />
+            <line x1="41" y1="85" x2="50" y2="85" />
+            <line x1="90" y1="85" x2="99" y2="85" />
+            <ellipse cx="70" cy="85" rx="34" ry="17" stroke-dasharray="3 2" />
+            <ellipse cx="70" cy="85" rx="54" ry="29" transform="rotate(-18 70 85)" />
+            <circle cx="104" cy="85" r="4" fill="currentColor" stroke="none" />
+            <circle cx="24" cy="69" r="5" />
+          </svg>
+        `
+      },
+      {
+        id: "double-pendulum",
+        numeral: "III",
+        code: "ARCANA · 03",
+        title: "Chaos & Pendulum",
+        fullTitle: "III. Double Pendulum Chaos",
+        category: "simulations",
+        categoryLabel: "Dynamical System",
+        status: "Planned",
+        live: false,
+        url: "",
+        tags: ["Trigonometry", "ODE / RK4", "Trails"],
+        description: "Coupled double pendulum illustrating sensitive dependence on initial conditions with calligraphic ink path traces.",
+        concept: "Coupled angular accelerations solved numerically and rendered across a fading motion buffer.",
+        art: `
+          <svg viewBox="0 0 140 170" stroke-width="1.7" stroke-linecap="round">
+            <line x1="42" y1="24" x2="98" y2="24" stroke-width="2.2" />
+            <line x1="70" y1="24" x2="50" y2="74" />
+            <circle cx="50" cy="74" r="6" fill="currentColor" fill-opacity="0.18" />
+            <line x1="50" y1="74" x2="92" y2="116" />
+            <circle cx="92" cy="116" r="8" fill="currentColor" fill-opacity="0.25" />
+            <path d="M92 116 C 118 102, 118 62, 86 54 C 58 48, 46 98, 76 128" stroke-dasharray="2.5 2.5" />
+          </svg>
+        `
+      },
+      {
+        id: "ascii-camera",
+        numeral: "IV",
+        code: "ARCANA · 04",
+        title: "The Mirror",
+        fullTitle: "IV. ASCII Webcam Mirror",
+        category: "tools",
+        categoryLabel: "Pixel & Vision Tool",
+        status: "Planned",
+        live: false,
+        url: "",
+        tags: ["Pixel Buffer", "Luminance", "ASCII"],
+        description: "Live video feed translated into high-contrast typographic grids using perceptual brightness ramps.",
+        concept: "Sampling RGBA pixel arrays and mapping luminance L = 0.299R + 0.587G + 0.114B to glyph density.",
+        art: `
+          <svg viewBox="0 0 140 170" stroke-width="1.6">
+            <rect x="24" y="34" width="92" height="102" rx="3" />
+            <line x1="24" y1="50" x2="116" y2="50" />
+            <circle cx="33" cy="42" r="2" fill="currentColor" stroke="none" />
+            <circle cx="41" cy="42" r="2" fill="currentColor" stroke="none" />
+            <text x="36" y="74" font-family="JetBrains Mono, monospace" font-size="11" fill="currentColor" stroke="none">. : - = + * # % @</text>
+            <text x="36" y="92" font-family="JetBrains Mono, monospace" font-size="11" fill="currentColor" stroke="none">: - = + * # % @ #</text>
+            <text x="36" y="110" font-family="JetBrains Mono, monospace" font-size="11" fill="currentColor" stroke="none">- = + * # % @ # *</text>
+            <text x="36" y="128" font-family="JetBrains Mono, monospace" font-size="11" fill="currentColor" stroke="none">= + * # % @ # * =</text>
+          </svg>
+        `
+      },
+      {
+        id: "maze-generator",
+        numeral: "V",
+        code: "ARCANA · 05",
+        title: "The Labyrinth",
+        fullTitle: "V. Maze Generator (DFS)",
+        category: "simulations",
+        categoryLabel: "Graph Algorithm",
+        status: "Planned",
+        live: false,
+        url: "",
+        tags: ["Graph DFS", "Backtracking", "Grid"],
+        description: "Procedural labyrinth generator carving passages across a 2D cell graph via recursive backtracking.",
+        concept: "Depth-First Search with an explicit stack to carve a spanning tree without cycles.",
+        art: `
+          <svg viewBox="0 0 140 170" stroke-width="1.8" stroke-linecap="square">
+            <rect x="26" y="34" width="88" height="102" />
+            <path d="M26 56 H56 V78 H84 V56" />
+            <path d="M56 78 V106 H26" />
+            <path d="M84 78 V116 H114" />
+            <path d="M56 106 H84 V136" />
+            <circle cx="98" cy="122" r="3.5" fill="currentColor" stroke="none" />
+          </svg>
+        `
+      },
+      {
+        id: "kaleidoscope",
+        numeral: "VI",
+        code: "ARCANA · 06",
+        title: "Symmetry",
+        fullTitle: "VI. Radial Kaleidoscope",
+        category: "tools",
+        categoryLabel: "Generative Geometry",
+        status: "Planned",
+        live: false,
+        url: "",
+        tags: ["Polar Coords", "Rotations", "Reflection"],
+        description: "Interactive drawing instrument mirroring strokes across radial slices and reflected axes.",
+        concept: "Transforming Cartesian points (x, y) into angular sectors θ = 2π·k / N with mirror reflections.",
+        art: `
+          <svg viewBox="0 0 140 170" stroke-width="1.5">
+            <circle cx="70" cy="85" r="44" />
+            <circle cx="70" cy="85" r="26" stroke-dasharray="2 2" />
+            <line x1="70" y1="41" x2="70" y2="129" />
+            <line x1="26" y1="85" x2="114" y2="85" />
+            <line x1="39" y1="54" x2="101" y2="116" />
+            <line x1="101" y1="54" x2="39" y2="116" />
+            <polygon points="70,59 78,85 70,111 62,85" fill="currentColor" fill-opacity="0.14" />
+          </svg>
+        `
+      },
+      {
+        id: "pixel-editor",
+        numeral: "VII",
+        code: "ARCANA · 07",
+        title: "The Glyph Matrix",
+        fullTitle: "VII. Pixel Art Editor",
+        category: "tools",
+        categoryLabel: "2D Grid Tool",
+        status: "Planned",
+        live: false,
+        url: "",
+        tags: ["2D Arrays", "Undo Stack", "Sprites"],
+        description: "Minimalist black-and-white pixel grid editor with flood fill, symmetry toggle, and undo/redo history.",
+        concept: "Mapping pointer coordinates to a 2D matrix buffer with a LIFO snapshot stack for undo/redo.",
+        art: `
+          <svg viewBox="0 0 140 170" stroke-width="1.5">
+            <rect x="30" y="38" width="80" height="80" />
+            <line x1="50" y1="38" x2="50" y2="118" stroke-opacity="0.35" />
+            <line x1="70" y1="38" x2="70" y2="118" stroke-opacity="0.35" />
+            <line x1="90" y1="38" x2="90" y2="118" stroke-opacity="0.35" />
+            <line x1="30" y1="58" x2="110" y2="58" stroke-opacity="0.35" />
+            <line x1="30" y1="78" x2="110" y2="78" stroke-opacity="0.35" />
+            <line x1="30" y1="98" x2="110" y2="98" stroke-opacity="0.35" />
+            <rect x="50" y="58" width="20" height="20" fill="currentColor" />
+            <rect x="70" y="58" width="20" height="20" fill="currentColor" />
+            <rect x="50" y="78" width="20" height="20" fill="currentColor" />
+            <rect x="70" y="98" width="20" height="20" fill="currentColor" />
+            <rect x="30" y="128" width="22" height="10" fill="currentColor" />
+            <rect x="59" y="128" width="22" height="10" fill="currentColor" fill-opacity="0.45" />
+            <rect x="88" y="128" width="22" height="10" />
+          </svg>
+        `
+      },
+      {
+        id: "retro-snake",
+        numeral: "VIII",
+        code: "ARCANA · 08",
+        title: "The Serpent",
+        fullTitle: "VIII. Retro Snake Clone",
+        category: "games",
+        categoryLabel: "Classic Arcade Game",
+        status: "Planned",
+        live: false,
+        url: "",
+        tags: ["Queue / Deque", "Game Loop", "Collisions"],
+        description: "Discrete-step grid arcade game featuring direction buffering, food spawning, and boundary/self collision rules.",
+        concept: "Representing the snake body as an ordered coordinate queue where movement appends head and pops tail.",
+        art: `
+          <svg viewBox="0 0 140 170" stroke-width="1.8" stroke-linejoin="round">
+            <rect x="26" y="36" width="88" height="100" rx="2" />
+            <path d="M44 114 H86 V86 H52 V58 H88" fill="none" stroke-width="6" stroke-opacity="0.18" />
+            <path d="M44 114 H86 V86 H52 V58 H88" fill="none" />
+            <rect x="84" y="54" width="8" height="8" fill="currentColor" stroke="none" />
+            <circle cx="96" cy="100" r="4" />
+          </svg>
+        `
+      }
+    ];
+
+    const ROMAN_NUMERALS = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
+
+    // State
+    let deckOrder = [...PROJECTS];
+    let activeFilter = "all";
+    let activeIndex = 0;
+    let viewMode = "deck"; // "deck" | "grid"
+
+    // DOM Elements
+    const themeToggle = document.getElementById("themeToggle");
+    const themeLabel = document.getElementById("themeLabel");
+    const filterTabs = document.querySelectorAll(".filter-tab");
+    const viewDeckBtn = document.getElementById("viewDeckBtn");
+    const viewGridBtn = document.getElementById("viewGridBtn");
+    const deckStage = document.getElementById("deckStage");
+    const spreadGrid = document.getElementById("spreadGrid");
+    const cardStack = document.getElementById("cardStack");
+    const dossierPanel = document.getElementById("dossierPanel");
+    const deckCounter = document.getElementById("deckCounter");
+    const prevCardBtn = document.getElementById("prevCardBtn");
+    const drawCardBtn = document.getElementById("drawCardBtn");
+    const shuffleDeckBtn = document.getElementById("shuffleDeckBtn");
+
+    function getFilteredProjects() {
+      if (activeFilter === "all") return deckOrder;
+      return deckOrder.filter((p) => p.category === activeFilter);
+    }
+
+    function buildTarotCardElement(project, displayNumeral) {
+      const card = document.createElement("article");
+      card.className = "tarot-card";
+      card.innerHTML = `
+        <div class="tarot-inner-frame">
+          <div class="tarot-header">
+            <span class="tarot-roman">${displayNumeral}</span>
+            <span class="tarot-arcana-code">${project.code}</span>
+          </div>
+          <div class="tarot-art-box">
+            ${project.art}
+          </div>
+          <div class="tarot-nameplate">${project.title}</div>
+        </div>
+      `;
+      return card;
+    }
+
+    function renderDeckView(items) {
+      cardStack.innerHTML = "";
+
+      if (items.length === 0) {
+        deckCounter.textContent = "0 cards";
+        dossierPanel.innerHTML = `<p class="dossier-desc">No cards in this category.</p>`;
+        return;
+      }
+
+      if (activeIndex >= items.length) activeIndex = 0;
+      if (activeIndex < 0) activeIndex = items.length - 1;
+
+      const current = items[activeIndex];
+      const total = items.length;
+
+      // Render up to 4 stacked cards starting from activeIndex so the top card is on top
+      const visibleCount = Math.min(4, total);
+      for (let offset = visibleCount - 1; offset >= 0; offset--) {
+        const idx = (activeIndex + offset) % total;
+        const proj = items[idx];
+        const cardEl = buildTarotCardElement(proj, ROMAN_NUMERALS[idx] || proj.numeral);
+
+        // Subtle fan/stack offset behind the top card
+        const tx = offset * 5;
+        const ty = offset * 4;
+        const rot = offset === 0 ? 0 : (offset % 2 === 0 ? -1.8 * offset : 1.8 * offset);
+        const scale = 1 - offset * 0.025;
+
+        cardEl.style.zIndex = String(20 - offset);
+        cardEl.style.transform = `translate(${tx}px, ${ty}px) rotate(${rot}deg) scale(${scale})`;
+        cardEl.style.opacity = offset === 0 ? "1" : String(Math.max(0.55, 1 - offset * 0.14));
+
+        if (offset === 0) {
+          cardEl.addEventListener("click", () => {
+            activeIndex = (activeIndex + 1) % total;
+            renderProjects();
+          });
+        }
+
+        cardStack.appendChild(cardEl);
+      }
+
+      prevCardBtn.disabled = total <= 1;
+      drawCardBtn.disabled = total <= 1;
+      deckCounter.textContent = `Card ${ROMAN_NUMERALS[activeIndex] || activeIndex + 1} of ${total}`;
+
+      // Render detailed inspector for active card
+      const actionHtml = current.live && current.url
+        ? `<a href="${current.url}" class="mono-btn solid">Launch ${current.url} ↗</a>`
+        : `<span class="mono-btn" style="opacity:0.65; cursor:default;">${current.status}</span>`;
+
+      dossierPanel.innerHTML = `
+        <div class="dossier-top">
+          <span>${current.categoryLabel}</span>
+          <span>Status: <strong>${current.status}</strong></span>
+        </div>
+        <h3 class="dossier-title">${current.fullTitle}</h3>
+        <p class="dossier-desc">${current.description}</p>
+        <div class="dossier-meaning">
+          <strong>Core Mechanism / Concept</strong>
+          <span>${current.concept}</span>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;">
+          ${current.tags.map((t) => `<span class="tag">${t}</span>`).join("")}
+        </div>
+        <div class="dossier-footer">
+          <span class="font-mono-code" style="font-size:11px; color:var(--ink-muted);">Click card or "Draw Next" to cycle</span>
+          ${actionHtml}
+        </div>
+      `;
+    }
+
+    function renderGridView(items) {
+      spreadGrid.innerHTML = "";
+
+      items.forEach((proj, idx) => {
+        const wrap = document.createElement("div");
+        wrap.className = "spread-card-wrap";
+
+        const cardEl = buildTarotCardElement(proj, ROMAN_NUMERALS[idx] || proj.numeral);
+        cardEl.addEventListener("click", () => {
+          if (proj.live && proj.url) {
+            window.location.href = proj.url;
+          } else {
+            activeIndex = idx;
+            setViewMode("deck");
+          }
+        });
+
+        const linkAction = proj.live && proj.url
+          ? `<a href="${proj.url}" class="mono-btn solid" style="padding:3px 8px; font-size:10.5px;">Open ↗</a>`
+          : `<span>${proj.status}</span>`;
+
+        const meta = document.createElement("div");
+        meta.className = "spread-meta";
+        meta.innerHTML = `
+          <p>${proj.description}</p>
+          <div class="spread-meta-bottom">
+            <span>${proj.tags[0] || proj.categoryLabel}</span>
+            ${linkAction}
+          </div>
+        `;
+
+        wrap.appendChild(cardEl);
+        wrap.appendChild(meta);
+        spreadGrid.appendChild(wrap);
+      });
+    }
+
+    function renderProjects() {
+      const items = getFilteredProjects();
+      if (viewMode === "deck") {
+        deckStage.classList.remove("hidden-view");
+        spreadGrid.classList.remove("active");
+        renderDeckView(items);
+      } else {
+        deckStage.classList.add("hidden-view");
+        spreadGrid.classList.add("active");
+        renderGridView(items);
+      }
+    }
+
+    function setViewMode(mode) {
+      viewMode = mode;
+      viewDeckBtn.classList.toggle("active", mode === "deck");
+      viewGridBtn.classList.toggle("active", mode === "grid");
+      renderProjects();
+    }
+
+    // Theme Toggle
+    themeToggle.addEventListener("click", () => {
+      const root = document.documentElement;
+      const next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+      root.setAttribute("data-theme", next);
+      themeLabel.textContent = next === "dark" ? "Dark Mono" : "Monochrome";
+    });
+
+    // Category Tabs
+    filterTabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        filterTabs.forEach((t) => {
+          t.classList.remove("active");
+          t.setAttribute("aria-selected", "false");
+        });
+        tab.classList.add("active");
+        tab.setAttribute("aria-selected", "true");
+        activeFilter = tab.dataset.filter;
+        activeIndex = 0;
+        renderProjects();
+      });
+    });
+
+    // View Switcher
+    viewDeckBtn.addEventListener("click", () => setViewMode("deck"));
+    viewGridBtn.addEventListener("click", () => setViewMode("grid"));
+
+    // Deck Navigation Controls
+    prevCardBtn.addEventListener("click", () => {
+      const items = getFilteredProjects();
+      if (!items.length) return;
+      activeIndex = (activeIndex - 1 + items.length) % items.length;
+      renderProjects();
+    });
+
+    drawCardBtn.addEventListener("click", () => {
+      const items = getFilteredProjects();
+      if (!items.length) return;
+      activeIndex = (activeIndex + 1) % items.length;
+      renderProjects();
+    });
+
+    shuffleDeckBtn.addEventListener("click", () => {
+      for (let i = deckOrder.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deckOrder[i], deckOrder[j]] = [deckOrder[j], deckOrder[i]];
+      }
+      activeIndex = 0;
+      renderProjects();
+    });
+
+    cardStack.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        drawCardBtn.click();
+      }
+    });
+
+    // Initial Render
+    renderProjects();
+  </script>
+</body>
+</html>
