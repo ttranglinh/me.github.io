@@ -6,7 +6,7 @@
   <title>0. The Hangman </title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg: #ffffff;
@@ -67,22 +67,18 @@
 
     .breadcrumb {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
-      gap: 8px;
+      gap: 4px 8px;
       color: var(--muted);
     }
 
     .breadcrumb a {
-      color: var(--muted);
-      text-decoration: none;
+      color: inherit;
+      text-underline-offset: 0.2em;
     }
 
-    .breadcrumb a:hover {
-      color: var(--ink);
-      text-decoration: underline;
-    }
-
-    .breadcrumb strong {
+    .topbar-title {
       color: var(--ink);
       font-weight: 500;
     }
@@ -137,6 +133,7 @@
     }
 
     h1 {
+      font-family: 'Cinzel', Georgia, serif;
       font-size: clamp(24px, 3.5vw, 32px);
       font-weight: 700;
       letter-spacing: -0.025em;
@@ -163,33 +160,16 @@
       margin-bottom: 24px;
     }
 
-    .category-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .cat-btn {
-      background: transparent;
-      border: 1px solid transparent;
-      color: var(--muted);
+    #categorySelect {
+      max-width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--ink);
       font-family: var(--font-mono);
       font-size: 12px;
-      padding: 4px 10px;
+      padding: 6px 10px;
       border-radius: 4px;
       cursor: pointer;
-    }
-
-    .cat-btn:hover {
-      background: var(--bg);
-      color: var(--ink);
-    }
-
-    .cat-btn.active {
-      background: var(--bg);
-      border-color: var(--border);
-      color: var(--ink);
-      font-weight: 500;
     }
 
     /* Workspace Grid */
@@ -272,6 +252,8 @@
       border-radius: 4px;
       margin-bottom: 16px;
       display: flex;
+      flex-wrap: wrap;
+      gap: 4px 12px;
       justify-content: space-between;
       align-items: center;
     }
@@ -440,11 +422,11 @@
 <body>
 
   <header class="topbar">
-    <div class="breadcrumb">
-      <a href="../">Linh</a>
-      <span>/</span>
-      <strong>The Hangman Simulation</strong>
-    </div>
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="../index.html">me.inventor</a>
+      <span aria-hidden="true">/</span>
+      <span class="topbar-title" aria-current="page">The Hangman</span>
+    </nav>
     <div class="topbar-controls">
       <button class="btn" id="themeBtn" type="button">Theme: Light</button>
     </div>
@@ -452,34 +434,31 @@
 
   <main class="container">
     <div class="header-block">
-      <h1>The Hangman Simulation</h1>
+      <h1>I. The Hangman</h1>
       <p class="subtitle">
-        A minimalist state-machine implementation of Hangman paired with a real-time candidate-filtering and character-frequency heuristic solver. Use your physical keyboard or click letters below.
+        What is unseen isn't always lost.
       </p>
     </div>
 
     <!-- Category & Game Toolbar -->
     <div class="toolbar">
-      <div class="category-group" id="categoryGroup">
-        <button class="cat-btn active" data-cat="All" type="button">All Topics</button>
-        <button class="cat-btn" data-cat="Algorithms" type="button">Algorithms & CS</button>
-        <button class="cat-btn" data-cat="Graphics" type="button">Creative Coding</button>
-        <button class="cat-btn" data-cat="Structures" type="button">Data Structures</button>
-      </div>
-      <div style="display: flex; gap: 8px;">
+      <select id="categorySelect" aria-label="Word category">
+        <option value="mystery">Category: Mystery &amp; The Unseen</option>
+        <option value="mindstate">Category: State of Mind</option>
+        <option value="literature">Category: Literature</option>
+      </select>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px;">
         <button class="btn" id="clueBtn" type="button">Toggle Clue</button>
+        <button class="btn" id="hintBtn" type="button" aria-keyshortcuts="!">Reveal Letter (−3)</button>
         <button class="btn primary" id="newGameBtn" type="button">New Round</button>
       </div>
     </div>
 
     <!-- Main Interactive Workspace -->
     <div class="workspace">
-      <!-- Left: SVG Gallows & Vector State -->
+      <!-- Gallows and remaining guesses -->
       <div class="panel gallows-wrap">
-        <div class="panel-label" style="width: 100%;">
-          <span>State Vector</span>
-          <span id="errorRatio">0 / 6</span>
-        </div>
+        <div class="panel-label" id="guessCount" style="width: 100%;">10 guesses left</div>
 
         <svg width="200" height="210" viewBox="0 0 200 210" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
           <!-- Gallows Frame -->
@@ -511,8 +490,8 @@
       <!-- Right: Word Slots & Keyboard -->
       <div class="panel">
         <div class="status-banner">
-          <span id="statusText">STATUS: IN_PROGRESS</span>
-          <span id="catBadge">TOPIC: ALGORITHMS</span>
+          <span id="statusText" role="status">Guess a letter.</span>
+          <span id="catBadge"></span>
         </div>
 
         <div class="clue-box" id="clueBox"></div>
@@ -544,34 +523,58 @@
   </main>
 
   <script>
-    const DICTIONARY = [
-      { word: 'RECURSION', cat: 'Algorithms', clue: 'A function calling itself until reaching a base case.', note: 'Used in fractal trees, DFS maze carving, and divide-and-conquer sorting.' },
-      { word: 'BACKTRACKING', cat: 'Algorithms', clue: 'Incremental search that abandons dead-end paths.', note: 'Core mechanism behind recursive maze generation and constraint solvers.' },
-      { word: 'HEURISTIC', cat: 'Algorithms', clue: 'A practical rule-of-thumb strategy for fast problem solving.', note: 'A* pathfinding uses Manhattan or Euclidean distance heuristics to guide search.' },
-      { word: 'COMPLEXITY', cat: 'Algorithms', clue: 'Measures how runtime or memory scales with input size.', note: 'Often expressed in Big-O notation such as O(n log n).' },
-      { word: 'PENDULUM', cat: 'Graphics', clue: 'A suspended mass swinging under gravitational acceleration.', note: 'Coupling two pendulums creates a chaotic system solved via RK4 integration.' },
-      { word: 'KALEIDOSCOPE', cat: 'Graphics', clue: 'Symmetrical visual patterns generated via angular reflection.', note: 'Built in Canvas/p5.js using polar coordinates and rotational transforms.' },
-      { word: 'SHADER', cat: 'Graphics', clue: 'A small program executed in parallel per pixel on the GPU.', note: 'GLSL fragment shaders power real-time procedural noise and raymarching.' },
-      { word: 'KINEMATICS', cat: 'Graphics', clue: 'Describes motion via position, velocity, and acceleration.', note: 'Updating velocity by acceleration each frame forms the core physics loop.' },
-      { word: 'QUADTREE', cat: 'Structures', clue: 'A tree structure that recursively divides 2D space into four quadrants.', note: 'Reduces 2D particle collision checks from O(n²) down to O(n log n).' },
-      { word: 'HASHMAP', cat: 'Structures', clue: 'Maps keys to values for O(1) average lookup time.', note: 'Essential for frequency counting and caching computed states.' },
-      { word: 'ADJACENCY', cat: 'Structures', clue: 'Matrix or list representation showing connected graph vertices.', note: 'Used to represent grids and networks in graph traversal algorithms.' },
-      { word: 'QUEUE', cat: 'Structures', clue: 'First-In, First-Out (FIFO) linear collection.', note: 'Controls Breadth-First Search (BFS) and grid movement in Snake.' }
-    ];
+    const DICTIONARY = {
+      mystery: [
+        { word: "ENIGMA", clue: "A puzzle or person whose true nature remains veiled even under close study." },
+        { word: "CIPHER", clue: "A disguised message that looks like nonsense until you hold the key." },
+        { word: "OMEN", clue: "A subtle early sign hinting at what is quietly unfolding." },
+        { word: "LABYRINTH", clue: "A winding path where every dead end teaches you the shape of the maze." },
+        { word: "SHADOW", clue: "Proof that light is nearby, even when the source stays out of sight." },
+        { word: "CONUNDRUM", clue: "A riddle whose answer only appears once you question your first assumption." },
+        { word: "WHISPER", clue: "A truth spoken softly enough that only those paying attention catch it." },
+        { word: "PHANTOM", clue: "Something felt strongly in the mind though absent from the room." }
+      ],
+      mindstate: [
+        { word: "SERENITY", clue: "Calmness that stays intact even when the outside world turns noisy." },
+        { word: "SOLITUDE", clue: "Being alone without loneliness; the quiet space where clarity returns." },
+        { word: "REVERIE", clue: "A waking daydream where the mind wanders free of clocks and rules." },
+        { word: "CATHARSIS", clue: "The sudden emotional release that follows facing a heavy truth." },
+        { word: "LUCIDITY", clue: "Seeing a situation clearly, stripped of fear or wishful thinking." },
+        { word: "STILLNESS", clue: "Not the absence of movement, but the quiet control beneath it." },
+        { word: "EQUANIMITY", clue: "Meeting both praise and setback with the same steady breath." },
+        { word: "NOSTALGIA", clue: "A bittersweet ache for a memory that feels warmer in hindsight." }
+      ],
+      literature: [
+        { word: "ALLEGORY", clue: "A story whose surface characters carry a deeper hidden meaning." },
+        { word: "PROLOGUE", clue: "The quiet opening scene before the main journey begins." },
+        { word: "MONOLOGUE", clue: "An unfiltered truth spoken aloud when no one else is answering." },
+        { word: "EPILOGUE", clue: "A final backward glance after the main storm has settled." },
+        { word: "METAPHOR", clue: "Understanding one mystery by naming it after another." },
+        { word: "PALIMPSEST", clue: "A manuscript scraped clean and rewritten, yet still showing traces of its past." },
+        { word: "ANTHOLOGY", clue: "Different voices and fragments gathered between two covers." },
+        { word: "FORESHADOW", clue: "A quiet detail planted early that only makes sense at the ending." }
+      ]
+    };
 
-    let selectedCategory = 'All';
-    let currentEntry = DICTIONARY[0];
+    const STARTING_GUESSES = 10;
+    const HINT_COST = 3;
+    const VOWELS = 'AEIOU';
+
+    let roundWords;
+    let currentEntry;
     let guessedLetters = new Set();
-    let wrongGuesses = 0;
+    let guessesLeft = STARTING_GUESSES;
+    let feedback = 'Guess a letter.';
     let autoTimer = null;
 
-    const MAX_ERRORS = 6;
     const wordDisplay = document.getElementById('wordDisplay');
     const keyboardEl = document.getElementById('keyboard');
     const statusText = document.getElementById('statusText');
     const catBadge = document.getElementById('catBadge');
-    const errorRatio = document.getElementById('errorRatio');
+    const categorySelect = document.getElementById('categorySelect');
+    const guessCount = document.getElementById('guessCount');
     const stateDots = document.querySelectorAll('#stateDots .dot');
+    const hintBtn = document.getElementById('hintBtn');
     const clueBox = document.getElementById('clueBox');
     const conceptNote = document.getElementById('conceptNote');
     const solverStats = document.getElementById('solverStats');
@@ -592,21 +595,14 @@
       }
     });
 
-    // Category Selection
-    document.querySelectorAll('.cat-btn').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.cat-btn').forEach((b) => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedCategory = btn.dataset.cat;
-        startNewRound();
-      });
-    });
+    categorySelect.addEventListener('change', startNewRound);
 
     document.getElementById('clueBtn').addEventListener('click', () => {
       clueBox.classList.toggle('visible');
     });
 
     document.getElementById('newGameBtn').addEventListener('click', startNewRound);
+    hintBtn.addEventListener('click', revealLetter);
 
     function startNewRound() {
       if (autoTimer) {
@@ -615,18 +611,16 @@
         aiAutoBtn.textContent = 'Auto-Solve';
       }
 
-      const pool = selectedCategory === 'All'
-        ? DICTIONARY
-        : DICTIONARY.filter((item) => item.cat === selectedCategory);
-
-      currentEntry = pool[Math.floor(Math.random() * pool.length)];
+      roundWords = DICTIONARY[categorySelect.value];
+      currentEntry = roundWords[Math.floor(Math.random() * roundWords.length)];
       guessedLetters = new Set();
-      wrongGuesses = 0;
+      guessesLeft = STARTING_GUESSES;
+      feedback = 'Guess a letter.';
 
       clueBox.textContent = `Clue: ${currentEntry.clue}`;
       clueBox.classList.remove('visible');
       conceptNote.classList.remove('visible');
-      catBadge.textContent = `TOPIC: ${currentEntry.cat.toUpperCase()}`;
+      catBadge.textContent = categorySelect.selectedOptions[0].textContent;
 
       renderAll();
     }
@@ -636,14 +630,32 @@
     }
 
     function isGameOver() {
-      return isSolved() || wrongGuesses >= MAX_ERRORS;
+      return isSolved() || guessesLeft === 0;
     }
 
     function makeGuess(letter) {
       if (isGameOver() || guessedLetters.has(letter)) return;
       guessedLetters.add(letter);
-      if (!currentEntry.word.includes(letter)) {
-        wrongGuesses++;
+      if (currentEntry.word.includes(letter)) {
+        feedback = `Good guess: ${letter}.`;
+      } else {
+        const cost = VOWELS.includes(letter) ? 2 : 1;
+        guessesLeft = Math.max(0, guessesLeft - cost);
+        feedback = `${letter} is absent. −${cost} ${cost === 1 ? 'guess' : 'guesses'}.`;
+      }
+      renderAll();
+    }
+
+    function revealLetter() {
+      if (isGameOver()) return;
+      if (guessesLeft < HINT_COST) {
+        feedback = `You need ${HINT_COST} guesses to reveal a letter.`;
+      } else {
+        const missing = [...new Set(currentEntry.word)].filter((letter) => !guessedLetters.has(letter));
+        const letter = missing[Math.floor(Math.random() * missing.length)];
+        guessedLetters.add(letter);
+        guessesLeft -= HINT_COST;
+        feedback = `Revealed ${letter}. −${HINT_COST} guesses.`;
       }
       renderAll();
     }
@@ -653,7 +665,7 @@
       const wrongSet = new Set([...guessedLetters].filter((l) => !target.includes(l)));
 
       // Filter candidate words matching length, known positions, and excluded letters
-      const candidates = DICTIONARY.map((d) => d.word).filter((w) => {
+      const candidates = roundWords.map((entry) => entry.word).filter((w) => {
         if (w.length !== target.length) return false;
         for (let i = 0; i < target.length; i++) {
           const revealed = guessedLetters.has(target[i]) ? target[i] : null;
@@ -691,16 +703,19 @@
 
     function renderAll() {
       // Update SVG Figure & Dots
-      for (let i = 0; i < MAX_ERRORS; i++) {
+      const guessesSpent = STARTING_GUESSES - guessesLeft;
+      const visibleParts = Math.floor(guessesSpent * stateDots.length / STARTING_GUESSES);
+      for (let i = 0; i < stateDots.length; i++) {
         const part = document.getElementById(`part-${i}`);
-        part.classList.toggle('visible', i < wrongGuesses);
-        stateDots[i].classList.toggle('filled', i < wrongGuesses);
+        part.classList.toggle('visible', i < visibleParts);
+        stateDots[i].classList.toggle('filled', i < visibleParts);
       }
-      errorRatio.textContent = `${wrongGuesses} / ${MAX_ERRORS}`;
+      guessCount.textContent = `${guessesLeft} ${guessesLeft === 1 ? 'guess' : 'guesses'} left`;
 
       // Update Word Display
       const solved = isSolved();
-      const lost = wrongGuesses >= MAX_ERRORS && !solved;
+      const lost = guessesLeft === 0 && !solved;
+      hintBtn.disabled = solved || lost;
       wordDisplay.innerHTML = '';
 
       currentEntry.word.split('').forEach((ch) => {
@@ -715,17 +730,17 @@
         wordDisplay.appendChild(slot);
       });
 
-      // Update Status Banner & Concept Note
+      // Show the clue again once the round ends.
       if (solved) {
         statusText.textContent = 'STATUS: SOLVED';
-        conceptNote.innerHTML = `<strong>CS Context:</strong> ${currentEntry.note}`;
-        conceptNote.classList.add('visible');
       } else if (lost) {
         statusText.textContent = `STATUS: HALTED (${currentEntry.word})`;
-        conceptNote.innerHTML = `<strong>CS Context:</strong> ${currentEntry.note}`;
-        conceptNote.classList.add('visible');
       } else {
-        statusText.textContent = 'STATUS: IN_PROGRESS';
+        statusText.textContent = feedback;
+      }
+      if (solved || lost) {
+        conceptNote.textContent = `${currentEntry.word} — ${currentEntry.clue}`;
+        conceptNote.classList.add('visible');
       }
 
       // Update Keyboard
@@ -804,9 +819,11 @@
 
     // Physical Keyboard Support
     document.addEventListener('keydown', (e) => {
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.target === categorySelect || e.metaKey || e.ctrlKey || e.altKey) return;
       const key = e.key.toUpperCase();
-      if (/^[A-Z]$/.test(key)) {
+      if (key === '!') {
+        revealLetter();
+      } else if (/^[A-Z]$/.test(key)) {
         makeGuess(key);
       }
     });
